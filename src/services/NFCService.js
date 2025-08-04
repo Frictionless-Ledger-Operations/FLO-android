@@ -4,27 +4,47 @@ class NFCService {
   constructor() {
     this.isInitialized = false;
     this.isListening = false;
+    this.hasNFCSupport = false;
+    this.isNFCEnabled = false;
   }
 
   async initialize() {
     try {
-      console.log('Initializing REAL NFC Manager...');
-      
-      const supported = await NfcManager.isSupported();
-      if (!supported) {
-        console.error('REAL NFC is not supported on this device');
-        throw new Error('NFC is not supported on this device');
+      // Check if already initialized
+      if (this.isInitialized) {
+        return { 
+          supported: this.hasNFCSupport, 
+          enabled: this.isNFCEnabled 
+        };
       }
 
-      await NfcManager.start();
-      this.isInitialized = true;
+      console.log('Initializing NFC Manager...');
       
+      // Check NFC support
+      const supported = await NfcManager.isSupported();
+      if (!supported) {
+        console.error('NFC is not supported on this device');
+        this.hasNFCSupport = false;
+        return { supported: false, enabled: false };
+      }
+
+      // Start NFC manager
+      await NfcManager.start();
+      
+      // Check if NFC is enabled
       const enabled = await NfcManager.isEnabled();
-      console.log('REAL NFC initialized successfully, enabled:', enabled);
+      
+      // Store state
+      this.isInitialized = true;
+      this.hasNFCSupport = true;
+      this.isNFCEnabled = enabled;
+      
+      console.log('NFC initialized successfully, enabled:', enabled);
       
       return { supported: true, enabled };
     } catch (error) {
-      console.error('REAL NFC initialization failed:', error);
+      console.error('NFC initialization failed:', error);
+      this.cleanup();
       return { supported: false, enabled: false };
     }
   }
@@ -42,11 +62,15 @@ class NFCService {
 
   async sendTransactionData(transactionData) {
     try {
-      if (!this.isInitialized) {
-        await this.initialize();
+      // Ensure NFC is ready
+      if (!this.isInitialized || !this.isNFCEnabled) {
+        const status = await this.initialize();
+        if (!status.supported || !status.enabled) {
+          throw new Error('NFC is not available');
+        }
       }
 
-      console.log('Sending REAL transaction data via NFC...');
+      console.log('Preparing to send transaction via NFC...');
 
       // Convert transaction data to JSON string
       const dataString = JSON.stringify({
@@ -56,21 +80,27 @@ class NFCService {
         data: transactionData,
       });
 
-      console.log('REAL NFC data to send:', dataString.length, 'characters');
+      console.log('NFC data prepared:', dataString.length, 'characters');
 
-      // Create NDEF record using REAL NFC manager
+      // Create NDEF message
       const bytes = Ndef.encodeMessage([
         Ndef.textRecord(dataString),
       ]);
 
-      // Start REAL NFC technology and write data
-      await NfcManager.requestTechnology(NfcTech.Ndef);
+      // Cancel any existing NFC operations
+      await NfcManager.cancelTechnologyRequest().catch(() => null);
       
-      console.log('REAL NFC technology requested, writing data...');
+      // Request NFC technology
+      await NfcManager.requestTechnology(NfcTech.Ndef, {
+        alertMessage: 'Hold your device near the receiver...'
+      });
       
+      console.log('Writing NFC data...');
+      
+      // Write NDEF message
       await NfcManager.ndefHandler.writeNdefMessage(bytes);
       
-      console.log('REAL NFC data written successfully');
+      console.log('NFC data written successfully');
       
       return { success: true };
     } catch (error) {
@@ -92,8 +122,14 @@ class NFCService {
         await this.initialize();
       }
 
+      // Cancel any existing NFC operations
+      await NfcManager.cancelTechnologyRequest();
+      
       this.isListening = true;
       console.log('Starting REAL NFC listener for transactions...');
+
+      // Request NFC technology first
+      await NfcManager.requestTechnology(NfcTech.Ndef);
 
       // Start listening for REAL NFC tags
       await NfcManager.registerTagEvent((tag) => {
@@ -155,13 +191,28 @@ class NFCService {
   async stopListening() {
     try {
       if (this.isListening) {
+        // Unregister tag event listener
         await NfcManager.unregisterTagEvent();
+        
+        // Cancel any pending NFC operations
+        await NfcManager.cancelTechnologyRequest().catch(() => null);
+        
         this.isListening = false;
-        console.log('REAL NFC listener stopped');
+        console.log('NFC listener stopped');
       }
       return { success: true };
     } catch (error) {
-      console.error('Error stopping REAL NFC listener:', error);
+      console.error('Error stopping NFC listener:', error);
+      
+      // Attempt force cleanup
+      try {
+        await NfcManager.unregisterTagEvent();
+        await NfcManager.cancelTechnologyRequest();
+      } catch (e) {
+        console.error('Force stop failed:', e);
+      }
+      
+      this.isListening = false;
       throw new Error(`Failed to stop NFC listener: ${error.message}`);
     }
   }
@@ -188,14 +239,34 @@ class NFCService {
 
   async cleanup() {
     try {
-      await this.stopListening();
+      // Stop listening if active
+      if (this.isListening) {
+        await this.stopListening();
+      }
+
+      // Cancel any pending NFC operations
+      await NfcManager.cancelTechnologyRequest().catch(() => null);
+
+      // Stop NFC manager if initialized
       if (this.isInitialized) {
         await NfcManager.stop();
-        this.isInitialized = false;
-        console.log('REAL NFC cleaned up successfully');
       }
+
+      // Reset state
+      this.isInitialized = false;
+      this.isListening = false;
+      this.hasNFCSupport = false;
+      this.isNFCEnabled = false;
+
+      console.log('NFC service cleaned up successfully');
     } catch (error) {
-      console.error('Error cleaning up REAL NFC service:', error);
+      console.error('Error cleaning up NFC service:', error);
+      // Attempt force cleanup
+      try {
+        await NfcManager.stop();
+      } catch (e) {
+        console.error('Force cleanup failed:', e);
+      }
     }
   }
 
@@ -235,10 +306,10 @@ class NFCService {
         listening: this.isListening
       };
       
-      console.log('REAL NFC status:', status);
+      console.log('NFC status:', status);
       return status;
     } catch (error) {
-      console.error('Error getting REAL NFC status:', error);
+      console.error('Error getting NFC status:', error);
       return {
         supported: false,
         enabled: false,
@@ -246,6 +317,30 @@ class NFCService {
         listening: false
       };
     }
+  }
+
+  // Helper method to ensure NFC is ready
+  async ensureNFCReady() {
+    if (!this.isInitialized || !this.isNFCEnabled) {
+      const status = await this.initialize();
+      if (!status.supported || !status.enabled) {
+        throw new Error('NFC is not available or enabled');
+      }
+    }
+  }
+
+  // Helper method to prepare for NFC operations
+  async prepareNFCOperation() {
+    await this.ensureNFCReady();
+    await this.stopListening();
+    await NfcManager.cancelTechnologyRequest().catch(() => null);
+  }
+
+  // Helper method to handle NFC errors
+  handleNFCError(error, operation) {
+    console.error(`NFC ${operation} error:`, error);
+    this.cleanup().catch(console.error);
+    throw new Error(`NFC ${operation} failed: ${error.message}`);
   }
 }
 

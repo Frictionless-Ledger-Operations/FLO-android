@@ -6,6 +6,7 @@ import {
   LAMPORTS_PER_SOL,
   clusterApiUrl,
 } from '@solana/web3.js';
+import { Buffer } from 'buffer';
 
 // REAL Solana Mobile Wallet Adapter - NO SIMULATION
 import { transact } from '@solana-mobile/mobile-wallet-adapter-protocol-web3js';
@@ -32,12 +33,13 @@ class SolanaService {
         console.log('REAL Mobile Wallet Adapter session established');
         
         // Request authorization from REAL wallet
+        console.log('About to call wallet.authorize...');
         const authorizationResult = await wallet.authorize({
           cluster: 'devnet', // Change to 'mainnet-beta' for production
           identity: {
             name: 'Solana P2P Payment',
             uri: 'https://solanap2p.app',
-            icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMxNEYxOTUiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik04IDNMMTMgOEw4IDEzTDMgOEw4IDNaIiBmaWxsPSIjMEEwRjFDIi8+Cjwvc3ZnPgo8L3N2Zz4K',
+            // icon removed to prevent any URI issues
           },
           features: ['solana:signAndSendTransaction', 'solana:signTransaction', 'solana:signMessage'],
         });
@@ -51,9 +53,39 @@ class SolanaService {
         };
       });
 
-      // Store REAL wallet information
+      // Store REAL wallet information - SIMPLIFIED
+      const firstAccount = result.accounts[0];
+      
+      console.log('Raw first account:', firstAccount);
+      console.log('Raw address:', firstAccount.address);
+      console.log('Address type:', typeof firstAccount.address);
+      console.log('Address length:', firstAccount.address?.length);
+      
+      // Clean and validate the public key
+      const rawPublicKey = firstAccount.address;
+      console.log('Raw public key received:', rawPublicKey);
+      
+      // Try to clean and convert the key
+      const cleanedKey = this.cleanPublicKeyString(rawPublicKey);
+      console.log('Cleaned key result:', cleanedKey);
+      
+      if (!cleanedKey) {
+        console.error('Failed to clean/convert public key from:', rawPublicKey);
+        throw new Error('Invalid wallet public key format received from wallet');
+      }
+      
+      // Double check the cleaned key is valid
+      if (!this.isValidPublicKey(cleanedKey)) {
+        console.error('Cleaned key failed validation:', cleanedKey);
+        throw new Error('Invalid Solana public key format');
+      }
+      
+      const publicKeyString = cleanedKey;
+      console.log('Successfully converted and validated public key:', publicKeyString);
+      
+      // Use the cleaned account address
       this.wallet = {
-        publicKey: new PublicKey(result.accounts[0].address),
+        publicKey: publicKeyString,
         accounts: result.accounts,
         authToken: result.authToken,
         walletUriBase: result.walletUriBase,
@@ -63,7 +95,7 @@ class SolanaService {
 
       this.isConnected = true;
 
-      console.log(`REAL wallet connected: ${this.wallet.name} (${this.wallet.publicKey.toString()})`);
+      console.log(`REAL wallet connected: ${this.wallet.name} (${typeof this.wallet.publicKey === 'string' ? this.wallet.publicKey : this.wallet.publicKey.toString()})`);
 
       // Get actual balance from Solana network
       const balance = await this.getBalance(this.wallet.publicKey);
@@ -207,7 +239,7 @@ class SolanaService {
           identity: {
             name: 'Solana P2P Payment',
             uri: 'https://solanap2p.app',
-            icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMxNEYxOTUiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik04IDNMMTMgOEw4IDEzTDMgOEw4IDNaIiBmaWxsPSIjMEEwRjFDIi8+Cjwvc3ZnPgo8L3N2Zz4K',
+            // icon removed to prevent URI issues
           },
         });
 
@@ -314,7 +346,7 @@ class SolanaService {
           identity: {
             name: 'Solana P2P Payment',
             uri: 'https://solanap2p.app',
-            icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiMxNEYxOTUiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik04IDNMMTMgOEw4IDEzTDMgOEw4IDNaIiBmaWxsPSIjMEEwRjFDIi8+Cjwvc3ZnPgo8L3N2Zz4K',
+            // icon removed to prevent URI issues
           },
         });
 
@@ -419,7 +451,7 @@ class SolanaService {
   // Get current REAL wallet info
   getWalletInfo() {
     return this.wallet ? {
-      publicKey: this.wallet.publicKey.toString(),
+      publicKey: typeof this.wallet.publicKey === 'string' ? this.wallet.publicKey : this.wallet.publicKey.toString(),
       name: this.wallet.name,
       connected: this.isConnected,
       accounts: this.wallet.accounts,
@@ -440,10 +472,44 @@ class SolanaService {
   // Validate a Solana public key
   isValidPublicKey(publicKeyString) {
     try {
-      new PublicKey(publicKeyString);
+      if (!publicKeyString) return false;
+      
+      // Clean the string first
+      const cleanedKey = this.cleanPublicKeyString(publicKeyString);
+      if (!cleanedKey) return false;
+      
+      // Validate the cleaned key
+      new PublicKey(cleanedKey);
       return true;
     } catch (error) {
       return false;
+    }
+  }
+
+  // Clean a public key string to ensure it's valid base58
+  cleanPublicKeyString(publicKeyString) {
+    if (!publicKeyString) return null;
+    
+    try {
+      // Check if it's already a valid base58 string
+      const base58Pattern = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+      if (base58Pattern.test(publicKeyString)) {
+        return publicKeyString;
+      }
+      
+      // Check if it's base64 (contains characteristic base64 chars like +, /, =)
+      if (publicKeyString.includes('+') || publicKeyString.includes('/') || publicKeyString.endsWith('=')) {
+        // Convert base64 to buffer
+        const buffer = Buffer.from(publicKeyString, 'base64');
+        // Create PublicKey from buffer and get base58 string
+        const pubKey = new PublicKey(buffer);
+        return pubKey.toBase58();
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error cleaning public key:', error);
+      return null;
     }
   }
 

@@ -224,7 +224,7 @@ const CreatePaymentScreen = ({ navigation }) => {
                   style={styles.qrButton}
                   onPress={handleScanQR}
                 >
-                  <Text style={styles.qrButtonText}>📷</Text>
+                  <Text style={styles.qrButtonText}>QR</Text>
                 </TouchableOpacity>
               </View>
               {errors.recipientAddress && (

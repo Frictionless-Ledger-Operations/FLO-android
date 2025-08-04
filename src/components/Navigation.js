@@ -3,9 +3,13 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
+import { enableScreens } from 'react-native-screens';
 
 import { colors } from '../styles/theme';
 import { useApp } from '../context/AppContext';
+
+// Disable native screens to prevent animation conflicts
+enableScreens(false);
 
 // Import screens
 import LoginScreen from '../screens/LoginScreen';
@@ -93,8 +97,10 @@ const AppNavigator = () => {
         screenOptions={{
           headerShown: false,
           cardStyle: { backgroundColor: colors.background },
-          gestureEnabled: true,
-          gestureDirection: 'horizontal',
+          gestureEnabled: false,
+          presentation: 'modal',
+          animationEnabled: false,
+          detachPreviousScreen: false
         }}
       >
         {!state.isAuthenticated ? (
@@ -103,8 +109,7 @@ const AppNavigator = () => {
             name="Login"
             component={LoginScreen}
             options={{ 
-              gestureEnabled: false,
-              animationTypeForReplace: 'push'
+              animationEnabled: false
             }}
           />
         ) : (
@@ -114,15 +119,13 @@ const AppNavigator = () => {
               name="Main"
               component={MainTabs}
               options={{ 
-                gestureEnabled: false,
-                animationTypeForReplace: 'push'
+                animationEnabled: false
               }}
             />
             <Stack.Screen
               name="CreatePayment"
               component={CreatePaymentScreen}
               options={{
-                presentation: 'modal',
                 headerShown: true,
                 headerTitle: 'Create Payment',
                 headerStyle: {
@@ -132,13 +135,13 @@ const AppNavigator = () => {
                 headerTitleStyle: {
                   fontWeight: '600',
                 },
+                animationEnabled: false
               }}
             />
             <Stack.Screen
               name="NFCSend"
               component={NFCSendScreen}
               options={{
-                presentation: 'modal',
                 headerShown: true,
                 headerTitle: 'Send via NFC',
                 headerStyle: {
@@ -148,14 +151,13 @@ const AppNavigator = () => {
                 headerTitleStyle: {
                   fontWeight: '600',
                 },
-                gestureEnabled: false,
+                animationEnabled: false
               }}
             />
             <Stack.Screen
               name="Finalize"
               component={FinalizeScreen}
               options={{
-                presentation: 'modal',
                 headerShown: true,
                 headerTitle: 'Finalize Payment',
                 headerStyle: {
@@ -165,6 +167,7 @@ const AppNavigator = () => {
                 headerTitleStyle: {
                   fontWeight: '600',
                 },
+                animationEnabled: false
               }}
             />
           </>

@@ -123,12 +123,12 @@ const NFCSendScreen = ({ navigation }) => {
         Animated.timing(pulseAnim, {
           toValue: 1.2,
           duration: 1000,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.timing(pulseAnim, {
           toValue: 1,
           duration: 1000,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
       ]).start(() => {
         if (transferStatus === 'ready') {
@@ -144,7 +144,7 @@ const NFCSendScreen = ({ navigation }) => {
     Animated.timing(pulseAnim, {
       toValue: 1,
       duration: 200,
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start();
   };
 
@@ -155,6 +155,10 @@ const NFCSendScreen = ({ navigation }) => {
 
     try {
       setTransferStatus('sending');
+
+      // Initialize NFC and prepare transfer data
+      await NFCService.initialize();
+      await NFCService.requestTechnology();
 
       // Prepare transfer data with wallet signature
       const transferData = {
@@ -177,20 +181,27 @@ const NFCSendScreen = ({ navigation }) => {
         },
       };
 
+      // Initialize NFC before sending
+      await NFCService.initialize();
+      
+      // Request NFC technology
+      await NFCService.requestTechnology();
+      
       // Send data via NFC
-      await NFCService.sendTransactionData(transferData);
+      const result = await NFCService.sendTransactionData(transferData);
       
-      setTransferStatus('success');
-      
-      // Show success message and navigate
-      setTimeout(() => {
+      if (result.success) {
+        setTransferStatus('success');
+        
+        // Show success message and navigate
         Alert.alert(
           'Transfer Successful',
           `Transaction has been sent via NFC signed by ${state.wallet.name}. The receiver can now finalize it.`,
           [{ text: 'OK', onPress: () => navigation.navigate('Home') }]
         );
-      }, 1000);
-
+      } else {
+        throw new Error('Failed to send data via NFC');
+      }
     } catch (error) {
       console.error('NFC transfer failed:', error);
       setTransferStatus('error');
@@ -232,12 +243,12 @@ const NFCSendScreen = ({ navigation }) => {
 
   const getStatusIcon = () => {
     switch (transferStatus) {
-      case 'preparing': return '⚙️';
-      case 'ready': return '📱';
-      case 'sending': return '📡';
-      case 'success': return '✅';
-      case 'error': return '❌';
-      default: return '📱';
+      case 'preparing': return 'PREP';
+      case 'ready': return 'NFC';
+      case 'sending': return 'SEND';
+      case 'success': return 'OK';
+      case 'error': return 'ERR';
+      default: return 'NFC';
     }
   };
 

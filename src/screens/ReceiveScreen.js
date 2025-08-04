@@ -154,12 +154,12 @@ const ReceiveScreen = ({ navigation }) => {
         Animated.timing(pulseAnim, {
           toValue: 1.1,
           duration: 1500,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.timing(pulseAnim, {
           toValue: 1,
           duration: 1500,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
       ]).start(() => {
         if (listeningStatus === 'listening') {
@@ -200,7 +200,7 @@ const ReceiveScreen = ({ navigation }) => {
       Animated.timing(pulseAnim, {
         toValue: 1,
         duration: 200,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
       Animated.timing(glowAnim, {
         toValue: 0,
@@ -233,12 +233,12 @@ const ReceiveScreen = ({ navigation }) => {
 
   const getStatusIcon = () => {
     switch (listeningStatus) {
-      case 'checking': return '🔍';
-      case 'ready': return '📱';
-      case 'listening': return '👂';
-      case 'received': return '✅';
-      case 'error': return '❌';
-      default: return '📱';
+      case 'checking': return 'SCAN';
+      case 'ready': return 'NFC';
+      case 'listening': return 'WAIT';
+      case 'received': return 'OK';
+      case 'error': return 'ERR';
+      default: return 'NFC';
     }
   };
 
