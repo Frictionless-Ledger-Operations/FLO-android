@@ -365,8 +365,15 @@ const styles = {
   },
   balanceCard: {
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.primary,
     marginBottom: 24,
+    borderRadius: 24,
+    padding: 24,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
   balanceAmount: {
     fontSize: 32,

@@ -1,11 +1,11 @@
 export const colors = {
-  // FLO blue theme
-  primary: '#2196F3', // Blue
-  secondary: '#1565C0', // Darker blue
-  accent: '#64B5F6', // Light blue accent
-  background: '#F4F8FB', // Very light blue/gray
-  surface: '#FFFFFF', // White cards
-  card: '#E3F2FD', // Light blue card
+  // FLO Modern Theme
+  primary: '#2563EB', // Vibrant blue
+  secondary: '#1E40AF', // Deep blue
+  accent: '#60A5FA', // Light blue accent
+  background: '#F8FAFC', // Cool gray background
+  surface: '#FFFFFF', // Pure white surface
+  card: '#F0F9FF', // Soft blue card
 
   // Status colors
   success: '#43A047',

@@ -1,55 +1,47 @@
 {
   "expo": {
     "name": "FLO",
-    "slug": "solana-p2p-real",
+    "slug": "flo-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/flo-icon.png",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/flo-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0A0F1C"
-    },
-    "ios": {
-      "supportsTablet": false,
-      "bundleIdentifier": "com.solana.p2p.real",
-      "infoPlist": {
-        "NFCReaderUsageDescription": "This app uses NFC to transfer payment data between devices for offline peer-to-peer transactions."
-      }
+      "backgroundColor": "#000000"
     },
     "android": {
-      "package": "com.solana.p2p.real",
-      "versionCode": 1,
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0A0F1C"
-      },
-      "permissions": [
-        "android.permission.NFC",
-        "android.permission.INTERNET",
-        "android.permission.ACCESS_NETWORK_STATE"
-      ],
-      "intentFilters": [
-        {
-          "action": "android.nfc.action.NDEF_DISCOVERED",
-          "data": [
-            {
-              "mimeType": "text/plain"
-            }
-          ]
-        }
-      ]
+      "package": "com.chiwbacca.floapp",
+    "versionCode": 1,
+    "adaptiveIcon": {
+      "foregroundImage": "./assets/flo-icon.png",
+      "backgroundColor": "#000000"
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "b5a52564-87e8-47a5-b995-1bdb95e021d1"
+    "permissions": [
+      "android.permission.NFC",
+      "android.permission.INTERNET",
+      "android.permission.ACCESS_NETWORK_STATE"
+    ],
+    "intentFilters": [
+      {
+        "action": "android.nfc.action.NDEF_DISCOVERED",
+        "data": [
+          {
+            "mimeType": "text/plain"
+          }
+        ]
       }
-    },
-    "owner": "chiwbacca"
-  }
+    ]
+  },
+  "web": {
+    "favicon": "./assets/favicon.png"
+  },
+  "extra": {
+    "eas": {
+      "projectId": "b5a52564-87e8-47a5-b995-1bdb95e021d1"
+    }
+  },
+  "owner": "chiwbacca"
 }
