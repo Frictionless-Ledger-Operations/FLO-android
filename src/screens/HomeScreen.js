@@ -194,15 +194,14 @@ const HomeScreen = ({ navigation }) => {
         }
       >
         <View style={globalStyles.safeContainer}>
-          {/* Header */}
+          {/* FLO Header */}
           <View style={styles.header}>
-            <View>
-              <Text style={globalStyles.subtitle}>Welcome back,</Text>
-              <Text style={globalStyles.title}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ fontSize: 32, fontWeight: 'bold', color: colors.primary, letterSpacing: 2 }}>FLO</Text>
+              <Text style={{ fontSize: 18, color: colors.textSecondary, marginLeft: 8 }}>
                 {truncatePublicKey(state.user?.publicKey || state.wallet?.publicKey, 6)}
               </Text>
             </View>
-            
             <TouchableOpacity
               style={styles.logoutButton}
               onPress={handleLogout}
@@ -211,13 +210,13 @@ const HomeScreen = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
-          {/* Wallet Balance */}
-          <View style={[globalStyles.card, styles.balanceCard]}>
-            <Text style={globalStyles.captionText}>Wallet Balance</Text>
-            <Text style={styles.balanceAmount}>
+          {/* Wallet Balance - Blue Card */}
+          <View style={[globalStyles.card, styles.balanceCard, { backgroundColor: colors.primary }]}> 
+            <Text style={[globalStyles.captionText, { color: '#fff', opacity: 0.8 }]}>Balance</Text>
+            <Text style={[styles.balanceAmount, { color: '#fff' }]}>
               {formatSOL(state.isOnline ? walletBalance : state.wallet?.balance || 0)}
             </Text>
-            <Text style={globalStyles.mutedText}>
+            <Text style={[globalStyles.mutedText, { color: '#fff', opacity: 0.7 }]}> 
               {state.isOnline ? 'Live balance' : 'Last known balance'}
             </Text>
           </View>

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Solana P2P - REAL zkLogin",
+    "name": "FLO",
     "slug": "solana-p2p-real",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -49,6 +49,7 @@
       "eas": {
         "projectId": "b5a52564-87e8-47a5-b995-1bdb95e021d1"
       }
-    }
+    },
+    "owner": "chiwbacca"
   }
 }

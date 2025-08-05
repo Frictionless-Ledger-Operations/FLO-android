@@ -1,30 +1,30 @@
 export const colors = {
-  // Solana-inspired dark theme
-  primary: '#14F195', // Solana green
-  secondary: '#9945FF', // Solana purple
-  accent: '#00D4AA', // Teal
-  background: '#0A0F1C', // Deep navy
-  surface: '#1A1F36', // Lighter navy
-  card: '#252A3F', // Card background
-  
+  // FLO blue theme
+  primary: '#2196F3', // Blue
+  secondary: '#1565C0', // Darker blue
+  accent: '#64B5F6', // Light blue accent
+  background: '#F4F8FB', // Very light blue/gray
+  surface: '#FFFFFF', // White cards
+  card: '#E3F2FD', // Light blue card
+
   // Status colors
-  success: '#10B981',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  info: '#3B82F6',
-  
+  success: '#43A047',
+  warning: '#FFA000',
+  error: '#E53935',
+  info: '#1976D2',
+
   // Text colors
-  text: '#FFFFFF',
-  textSecondary: '#94A3B8',
-  textMuted: '#64748B',
-  
+  text: '#0A2540',
+  textSecondary: '#5C6F82',
+  textMuted: '#90A4AE',
+
   // Border and divider
-  border: '#334155',
-  divider: '#1E293B',
-  
+  border: '#BBDEFB',
+  divider: '#E3F2FD',
+
   // NFC interaction
-  nfcActive: '#14F195',
-  nfcWaiting: '#9945FF',
+  nfcActive: '#2196F3',
+  nfcWaiting: '#64B5F6',
 };
 
 export const spacing = {

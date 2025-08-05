@@ -46,39 +46,41 @@ const MainTabs = () => {
       }}
     >
       <Tab.Screen
-        name="Home"
+        name="FLOHome"
         component={HomeScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: size, color }}>🏠</Text>
+            <Text style={{ fontSize: size, color }}>�</Text>
           ),
+          tabBarLabel: 'Home',
         }}
       />
       <Tab.Screen
-        name="Send"
+        name="FLOSend"
         component={CreatePaymentScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: size, color }}>💸</Text>
+            <Text style={{ fontSize: size, color }}>➕</Text>
           ),
           tabBarLabel: 'Send',
         }}
       />
       <Tab.Screen
-        name="Receive"
+        name="FLOReceive"
         component={ReceiveScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: size, color }}>📱</Text>
+            <Text style={{ fontSize: size, color }}>⬇️</Text>
           ),
+          tabBarLabel: 'Receive',
         }}
       />
       <Tab.Screen
-        name="Sync"
+        name="FLOSync"
         component={SyncScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: size, color }}>🔄</Text>
+            <Text style={{ fontSize: size, color }}>�</Text>
           ),
           tabBarLabel: 'History',
         }}

@@ -6,10 +6,12 @@ import {
   StatusBar,
   Alert,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { globalStyles } from '../styles/globalStyles';
 import { colors } from '../styles/theme';
+import floLogo from '../assets/flo-logo';
 import { useApp } from '../context/AppContext';
 import SolanaService from '../services/SolanaService';
 
@@ -65,12 +67,12 @@ const LoginScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={globalStyles.container}>
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
-      
       <View style={globalStyles.centerContainer}>
         {/* Logo */}
         <View style={styles.header}>
-          <Text style={styles.logo}>⚡ SolanaP2P</Text>
-          <Text style={styles.subtitle}>Peer-to-Peer Payments</Text>
+          <Image source={floLogo} style={styles.logoImage} resizeMode="contain" />
+          <Text style={styles.logo}>FLO</Text>
+          <Text style={styles.subtitle}>Pay Offline on Solana Mobile</Text>
         </View>
 
         {/* Connect Wallet Button */}
@@ -109,6 +111,11 @@ const styles = {
   header: {
     alignItems: 'center',
     marginBottom: 60,
+  },
+  logoImage: {
+    width: 96,
+    height: 96,
+    marginBottom: 12,
   },
   logo: {
     fontSize: 48,

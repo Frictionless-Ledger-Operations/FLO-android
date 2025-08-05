@@ -26,7 +26,9 @@ export const globalStyles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     marginVertical: spacing.sm,
-    ...shadows.md,
+    ...shadows.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   
   button: {
@@ -37,6 +39,10 @@ export const globalStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 50,
+    shadowColor: colors.primary,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 2,
   },
   
   buttonSecondary: {
@@ -59,6 +65,10 @@ export const globalStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 50,
+    shadowColor: colors.primary,
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 1,
   },
   
   buttonText: {
