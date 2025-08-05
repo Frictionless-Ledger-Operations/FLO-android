@@ -88,30 +88,46 @@ const NFCSendScreen = ({ navigation }) => {
       }
 
       setTransferStatus('preparing');
-      
-      // Check if wallet is connected
-      if (!state.wallet?.connected) {
-        throw new Error('Wallet not connected');
+
+      // Check if wallet is connected and has required properties
+      if (!state.wallet || !state.wallet.connected || !state.wallet.name || !state.wallet.provider || !state.wallet.publicKey) {
+        throw new Error('Wallet not connected or missing required wallet info');
       }
 
+      // Debug logs for wallet and transaction context
+      console.log('--- DEBUG: Wallet Info ---');
+      console.log('Wallet Name:', state.wallet.name);
+      console.log('Wallet Provider:', state.wallet.provider);
+      console.log('Wallet Public Key:', state.wallet.publicKey);
+      console.log('Wallet Connected:', state.wallet.connected);
+      if (state.wallet.network) {
+        console.log('Wallet Network:', state.wallet.network);
+      }
+      console.log('--- DEBUG: Transaction Info ---');
+      console.log('Transaction:', currentTransaction);
+
       console.log(`Signing transaction with ${state.wallet.name}...`);
-      
+
       // Sign the transaction using Mobile Wallet Adapter
       const signResult = await SolanaService.signTransaction(currentTransaction);
-      
+
+      if (!signResult || !signResult.signedTransaction) {
+        throw new Error('Signing result is invalid');
+      }
+
       setSignedTransaction(signResult);
       actions.signTransaction(signResult);
-      
+
       // Update status to ready for NFC transfer
       setTransferStatus('ready');
     } catch (error) {
       console.error('Transaction signing failed:', error);
       setTransferStatus('error');
       setTransferError(error.message);
-      
+
       Alert.alert(
         'Signing Failed',
-        'Unable to sign transaction with wallet. Please try again.',
+        error.message || 'Unable to sign transaction with wallet. Please try again.',
         [{ text: 'OK', onPress: () => navigation.goBack() }]
       );
     }

@@ -232,7 +232,6 @@ class SolanaService {
       // Use REAL Mobile Wallet Adapter to sign the transaction
       const result = await transact(async (wallet) => {
         console.log('Re-authorizing REAL wallet for transaction signing...');
-        
         // Re-authorize if needed
         await wallet.reauthorize({
           auth_token: this.wallet.authToken,
@@ -244,21 +243,67 @@ class SolanaService {
         });
 
         console.log('Requesting transaction signature from REAL wallet...');
-        
         // Sign the transaction with the REAL wallet
         const signResult = await wallet.signTransactions({
           transactions: [transaction],
         });
-
+        console.log('signResult from wallet.signTransactions:', signResult);
+        if (!signResult || !Array.isArray(signResult.signedTransactions) || signResult.signedTransactions.length === 0) {
+          throw new Error('Wallet did not return a signed transaction. User may have rejected or wallet failed.');
+        }
         console.log('Transaction signed successfully by REAL wallet');
-        
         return {
           signedTransactions: signResult.signedTransactions,
         };
       });
 
-      const signedTransaction = result.signedTransactions[0];
-      
+      let signedTransaction = result.signedTransactions[0];
+      if (!signedTransaction) {
+        console.warn('signedTransaction is invalid, attempting signAndSendTransactions fallback:', signedTransaction);
+        // Try signAndSendTransactions as a fallback
+        const sendResult = await transact(async (wallet) => {
+          return await wallet.signAndSendTransactions({
+            transactions: [transaction],
+            options: { commitment: 'confirmed' }
+          });
+        });
+        console.log('sendResult from wallet.signAndSendTransactions:', sendResult);
+        if (!sendResult || !Array.isArray(sendResult.signatures) || sendResult.signatures.length === 0) {
+          throw new Error('Wallet did not return a signature. User may have rejected or wallet failed.');
+        }
+        // Return the signature only (no signedTransaction)
+        return {
+          signedTransaction: null,
+          signature: sendResult.signatures[0],
+          nonce: this.generateNonce(),
+          walletName: this.wallet.name,
+          timestamp: Date.now(),
+        };
+      }
+
+      // If it's not a Transaction instance, reconstruct it
+      if (typeof signedTransaction.serialize !== 'function') {
+        try {
+          const { recentBlockhash, feePayer, instructions, signatures } = signedTransaction;
+          const tx = new Transaction({
+            recentBlockhash,
+            feePayer: new PublicKey(feePayer),
+          });
+          // Re-add instructions
+          for (const ix of instructions) {
+            tx.add(ix);
+          }
+          // Re-add signatures if present
+          if (signatures && Array.isArray(signatures)) {
+            tx.signatures = signatures;
+          }
+          signedTransaction = tx;
+        } catch (e) {
+          console.error('Failed to reconstruct Transaction from object:', e, signedTransaction);
+          throw new Error('Failed to reconstruct Transaction from wallet response.');
+        }
+      }
+
       return {
         signedTransaction: signedTransaction.serialize().toString('base64'),
         signature: null, // Will be available after broadcast
